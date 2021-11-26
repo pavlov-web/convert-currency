@@ -1,23 +1,27 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="Welcome to Your Vue.js App" />
+  <div class="content">
+    <s-button disabled @click="add">Кнопка</s-button>
+    <s-button @click="add">Кнопка</s-button>
+    <s-card title="Конвертер" />
+    <s-input type="number" min="1" />
+    <s-select :options="currencies" label-key="title" value-key="symbol" />
+  </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
 import { mapGetters } from "vuex";
+import SButton from "@/components/ui/SButton";
+import SCard from "@/components/ui/SCard";
+import SInput from "@/components/ui/SInput";
+import SSelect from "@/components/ui/SSelect";
 
 export default {
   name: "App",
-  components: {
-    HelloWorld,
-  },
+  components: { SSelect, SInput, SCard, SButton },
 
   computed: {
     ...mapGetters({
       currencies: "GET_CURRENCIES",
-      currentCurrency: "GET_CURRENT_CURRENCY",
-      targetCurrency: "GET_TARGET_CURRENCY",
     }),
   },
 
@@ -37,12 +41,5 @@ export default {
 </script>
 
 <style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+@import "src/assets/scss/base";
 </style>
