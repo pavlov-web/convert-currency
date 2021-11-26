@@ -5,11 +5,33 @@
 
 <script>
 import HelloWorld from "./components/HelloWorld.vue";
+import { mapGetters } from "vuex";
 
 export default {
   name: "App",
   components: {
     HelloWorld,
+  },
+
+  computed: {
+    ...mapGetters({
+      currencies: "GET_CURRENCIES",
+      currentCurrency: "GET_CURRENT_CURRENCY",
+      targetCurrency: "GET_TARGET_CURRENCY",
+    }),
+  },
+
+  methods: {
+    add() {
+      console.log(this.$store.state);
+    },
+  },
+
+  async mounted() {
+    await this.$store.dispatch("GET_CURRENCIES");
+    await this.$store.dispatch("GET_RATE");
+    await this.$store.dispatch("GET_HISTORY");
+    this.add();
   },
 };
 </script>
