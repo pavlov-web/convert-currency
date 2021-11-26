@@ -26,7 +26,11 @@ export default createStore({
   mutations: {
     SET_RATE: (state, data) => (state.rate = data),
     SET_HISTORY: (state, data) => (state.history = data),
-    SET_CURRENCIES: (state, data) => (state.currencies = data),
+    SET_CURRENCIES: (state, data) => {
+      setTimeout(() => {
+        state.currencies = data;
+      }, 2000);
+    },
     SET_CURRENT_SYMBOL: (state, data) => (state.from = data),
     SET_TARGET_SYMBOL: (state, data) => (state.to = data),
   },
