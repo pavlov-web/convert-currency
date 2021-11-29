@@ -16,7 +16,7 @@
             v-for="option in options"
             :key="option[valueKey]"
             :class="['s-select-option', isSelected(option)]"
-            @click="selected = option"
+            @click="[(selected = option), $emit('input', option)]"
           >
             {{ option[labelKey] }}
           </li>
@@ -33,6 +33,7 @@ import SSpinner from "@/components/ui/SSpinner";
 export default {
   name: "SSelect",
   components: { SSpinner, SIcon },
+  emits: ["input"],
   props: {
     options: {
       type: Array,
@@ -46,10 +47,7 @@ export default {
       type: String,
       default: "value",
     },
-    default: {
-      type: Object,
-      default: () => {},
-    },
+    default: String,
     loader: {
       type: Boolean,
       default: true,
@@ -85,9 +83,15 @@ export default {
   },
 
   watch: {
-    options: function (value) {
-      if (value?.length) {
-        this.selected = this.default || this.options[0];
+    options: function (options) {
+      if (options?.length) {
+        if (this.default) {
+          this.selected = options.find((option) => {
+            return option[this.valueKey] === this.default;
+          });
+        } else {
+          this.selected = this.options[0];
+        }
         this.loaded = false;
       }
     },
@@ -117,7 +121,6 @@ export default {
   position: relative;
   cursor: pointer;
   user-select: none;
-  margin: 20px;
   transition: 0.3s;
   box-shadow: 0 1px 2px rgba(97, 97, 97, 0.2), 0 2px 4px rgba(97, 97, 97, 0.2);
 

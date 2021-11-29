@@ -5,6 +5,7 @@ export default {
     header: String,
     field: String,
     size: String,
+    style: [String, Object],
     data: {
       type: () => Object,
     },

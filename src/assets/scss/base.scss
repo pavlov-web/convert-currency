@@ -25,7 +25,6 @@ body {
   font-family: Inter, sans-serif;
   background: #F3F5F9;
   color: #2A3135;
-  min-height: 2000px;
 }
 
 h3 {
@@ -34,6 +33,15 @@ h3 {
   font-size: 20px;
   line-height: 32px;
 }
+
+h4 {
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 16px;
+  text-transform: uppercase;
+  color: #3777A2;
+}
+
 
 .fade-enter-active,
 .fade-leave-active {

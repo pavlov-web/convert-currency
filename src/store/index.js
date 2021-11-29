@@ -17,22 +17,18 @@ export default createStore({
 
   getters: {
     GET_RATE: (state) => state.rate,
-    GET_HISTORY: (state) => state.rate,
+    GET_HISTORY: (state) => state.history,
     GET_CURRENCIES: (state) => state.currencies,
-    GET_CURRENT_SYMBOL: (state) => state.from,
-    GET_TARGET_SYMBOL: (state) => state.to,
+    GET_FROM: (state) => state.from,
+    GET_TO: (state) => state.to,
   },
 
   mutations: {
     SET_RATE: (state, data) => (state.rate = data),
     SET_HISTORY: (state, data) => (state.history = data),
-    SET_CURRENCIES: (state, data) => {
-      setTimeout(() => {
-        state.currencies = data;
-      }, 2000);
-    },
-    SET_CURRENT_SYMBOL: (state, data) => (state.from = data),
-    SET_TARGET_SYMBOL: (state, data) => (state.to = data),
+    SET_CURRENCIES: (state, data) => (state.currencies = data),
+    SET_FROM: (state, data) => (state.from = data),
+    SET_TO: (state, data) => (state.to = data),
   },
 
   actions: {
@@ -47,8 +43,8 @@ export default createStore({
       commit("SET_CURRENCIES", localeCurrencies);
     },
 
-    GET_RATE: async ({ commit, state }) => {
-      const { from, to } = state;
+    GET_RATE: async ({ commit }, payload) => {
+      const { from, to } = payload;
 
       const current = await api.get("/convert", {
         params: { from: from, to: to, amount: 1 },
@@ -58,6 +54,8 @@ export default createStore({
         params: { from: to, to: from, amount: 1 },
       });
 
+      commit("SET_FROM", from);
+      commit("SET_TO", to);
       commit("SET_RATE", {
         from_to: current.data.result.rate,
         to_from: target.data.result.rate,
@@ -82,7 +80,7 @@ export default createStore({
         history.push({
           from: data.base,
           to: to,
-          date: data.date,
+          date: new Date(data.date).toLocaleDateString("ru-RU"),
           rate: data.results[to],
         });
       }
