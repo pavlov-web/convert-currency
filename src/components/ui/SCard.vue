@@ -2,7 +2,7 @@
   <div class="s-card">
     <div class="s-card-header">
       <h3>{{ title }}</h3>
-      <s-icon name="settings" />
+      <slot name="tools" />
     </div>
     <div class="s-card-content">
       <slot />
@@ -11,10 +11,8 @@
 </template>
 
 <script>
-import SIcon from "@/components/ui/SIcon";
 export default {
   name: "SCard",
-  components: { SIcon },
   props: {
     title: {
       type: String,
@@ -39,6 +37,7 @@ export default {
 
   &-content {
     padding: 24px 36px;
+    height: 500px;
   }
 }
 </style>

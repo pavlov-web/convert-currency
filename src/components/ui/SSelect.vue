@@ -70,9 +70,9 @@ export default {
       if (this.focus) {
         const { left, top, height, width } = this.$el.getBoundingClientRect();
         Object.assign(this.$refs.options.style, {
-          left: left + pageXOffset + "px",
-          top: top + pageYOffset + height + "px",
-          width: width + "px",
+          left: `${left + pageXOffset}px`,
+          top: `${top + pageYOffset + height}px`,
+          width: `${width}px`,
         });
       }
     },
@@ -168,15 +168,5 @@ export default {
       background-color: #f3f5f9;
     }
   }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

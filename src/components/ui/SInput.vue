@@ -12,7 +12,6 @@ export default {
   name: "SInput",
   emits: ["update:modelValue"],
   props: {
-    classes: String,
     modelValue: String,
   },
 };
