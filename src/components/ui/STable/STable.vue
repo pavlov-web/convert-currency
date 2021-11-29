@@ -4,33 +4,21 @@
     <div class="s-table-header">
       <template v-for="(col, idx) in columns" :key="idx">
         <div
-          v-if="col.props.header"
           class="s-table-column"
-          :style="columnSize(col)"
+          :style="[columnStyle(col), col.props.style]"
         >
           {{ col.props.header }}
         </div>
       </template>
     </div>
     <div class="s-table-content">
-      <div
-        v-for="(row, idx) in data"
-        :key="idx"
-        :class="[
-          's-table-row',
-          {
-            's-table-row--border': border,
-          },
-        ]"
-      >
+      <div v-for="(row, idx) in data" :key="idx" :class="['s-table-row']">
         <template v-for="(col, idx) in columns" :key="idx">
-          <div class="s-table-column" :style="columnSize(col)">
-            <component
-              v-if="col.children"
-              :is="col.children.body"
-              :column="row"
-              :field="col.props.field"
-            />
+          <div
+            class="s-table-column"
+            :style="[columnStyle(col), col.props.style]"
+          >
+            <component v-if="col.children" :is="col.children.body" :row="row" />
             <template v-else>
               {{ row[col.props.field] }}
             </template>
@@ -45,7 +33,6 @@
 export default {
   name: "STable",
   props: {
-    border: Boolean,
     data: {
       type: Array,
       default: () => [],
@@ -57,8 +44,11 @@ export default {
     },
   },
   methods: {
-    columnSize(col) {
-      return col.props.size && `width: ${col.props.size}`;
+    columnStyle(col) {
+      return (
+        col.props.size &&
+        `min-width: ${col.props.size}; width: ${col.props.size};`
+      );
     },
   },
 };
@@ -68,17 +58,30 @@ export default {
 .s-table {
   color: #bec8cd;
   font-weight: bold;
-  font-size: 12px;
-  max-height: 100%;
-  overflow: auto;
+  font-size: 14px;
+  line-height: 20px;
+  height: 100%;
+
+  &-header {
+    padding-bottom: 10px;
+    padding-right: 10px;
+  }
 
   &-header,
   &-row {
     display: flex;
+  }
 
-    &--border {
-      border-top: 1px solid #bec8cd;
+  &-row {
+    &:nth-child(2n) {
+      background-color: #f3f5f9;
     }
+  }
+
+  &-content {
+    overflow: auto;
+    height: calc(100% - 32px);
+    padding-right: 10px;
   }
 
   &-column {

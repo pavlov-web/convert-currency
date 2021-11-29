@@ -11,3 +11,14 @@ export const getArrayDateOffset = (offset) => {
 
   return dates;
 };
+
+export const currencyFormat = (num, currency) => {
+  if (currency) {
+    return new Intl.NumberFormat("ru-Ru", {
+      style: "currency",
+      currency: currency,
+    }).format(num);
+  } else {
+    return new Intl.NumberFormat("ru-Ru").format(num);
+  }
+};

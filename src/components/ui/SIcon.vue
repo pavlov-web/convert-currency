@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="`s-icon s-icon-${size}`"
+    :class="`s-icon s-icon--${size}  s-icon--${name}`"
     v-html="getIcon"
     :style="pointer && 'cursor: pointer'"
   />
@@ -36,15 +36,15 @@ export default {
   align-items: center;
   justify-content: center;
 
-  &-big {
+  &--big {
     width: 32px;
     height: 32px;
   }
-  &-medium {
+  &--medium {
     width: 20px;
     height: 20px;
   }
-  &-small {
+  &--small {
     width: 12px;
     height: 12px;
   }
