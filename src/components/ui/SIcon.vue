@@ -1,5 +1,9 @@
 <template>
-  <div :class="`s-icon s-icon-${size}`" v-html="getIcon" />
+  <div
+    :class="`s-icon s-icon-${size}`"
+    v-html="getIcon"
+    :style="pointer && 'cursor: pointer'"
+  />
 </template>
 
 <script>
@@ -7,6 +11,7 @@ export default {
   name: "SIcon",
   props: {
     name: String,
+    pointer: Boolean,
     size: {
       type: String,
       default: "medium",
