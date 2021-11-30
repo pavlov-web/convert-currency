@@ -71,6 +71,13 @@
         <template v-slot:tools>
           <s-icon name="settings" pointer />
         </template>
+        <div ref="getHeightChart" style="height: 100%">
+          <LineChart
+            :height="getHeight"
+            v-if="isChart"
+            :chart-data="testData"
+          />
+        </div>
       </s-card>
 
       <s-card title="Список стоимостей" class="costs">
@@ -123,6 +130,7 @@ import SIcon from "@/components/ui/SIcon";
 import STable from "@/components/ui/STable/STable";
 import SColumn from "@/components/ui/STable/SColumn";
 import { currencyFormat } from "@/helpers";
+import { LineChart } from "vue-chart-3";
 
 export default {
   name: "App",
@@ -134,11 +142,13 @@ export default {
     SInput,
     SCard,
     SButton,
+    LineChart,
   },
 
   data() {
     return {
       isOpenModal: false,
+      isChart: false,
       from_currency: 1,
       to_currency: null,
     };
@@ -166,6 +176,29 @@ export default {
         };
       });
     },
+
+    getHeight() {
+      return this.$refs.getHeightChart.offsetHeight;
+    },
+
+    testData() {
+      return {
+        labels: this.history?.map((h) => h.date),
+        datasets: [
+          {
+            label: false,
+            data: this.history?.map((h) => h.rate),
+            backgroundColor: [
+              "#77CEFF",
+              "#0079AF",
+              "#123E6B",
+              "#97B0C4",
+              "#A5C8ED",
+            ],
+          },
+        ],
+      };
+    },
   },
 
   methods: {
@@ -191,6 +224,8 @@ export default {
       to: this.to,
     });
     await this.$store.dispatch("GET_HISTORY");
+    this.isChart = true;
+    console.log(this.$store.state);
     this.to_currency = this.rate.from_to;
   },
 };
@@ -223,10 +258,10 @@ export default {
   margin-left: auto;
   margin-right: auto;
   grid-template-areas:
-    "converter chart"
-    "history costs";
+    "converter history"
+    "chart costs ";
 
-  grid-template-columns: 50%;
+  grid-template-columns: 60% 40%;
   grid-template-rows: calc(50% - 16px) calc(50% - 16px);
   grid-column-gap: 32px;
   grid-row-gap: 32px;
