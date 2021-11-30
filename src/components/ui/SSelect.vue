@@ -1,22 +1,23 @@
 <template>
   <div :class="['s-select', { 's-select--focus': focus }]">
-    <div class="s-select-value">
-      {{ selected[labelKey] }}
-    </div>
+    <div class="s-select-value">{{ selected[labelKey] }}</div>
     <s-icon v-if="!loaded" name="down" />
     <s-spinner v-if="loaded" name="spinner" />
     <teleport to="body">
       <transition name="fade">
         <ul
           ref="options"
-          v-show="focus && options?.length"
+          v-show="focus && options.length"
           class="s-select-options"
         >
           <li
             v-for="option in options"
             :key="option[valueKey]"
             :class="['s-select-option', isSelected(option)]"
-            @click="[(selected = option), $emit('input', option)]"
+            @click="
+              setSelected(option[valueKey]);
+              emitValue();
+            "
           >
             {{ option[labelKey] }}
           </li>
@@ -33,8 +34,12 @@ import SSpinner from "@/components/ui/SSpinner";
 export default {
   name: "SSelect",
   components: { SSpinner, SIcon },
-  emits: ["input"],
+  emits: ["input", "update:modelValue"],
   props: {
+    modelValue: {
+      type: String,
+      default: "",
+    },
     options: {
       type: Array,
       default: () => [],
@@ -80,20 +85,26 @@ export default {
         ? "s-select-option--selected"
         : "";
     },
+
+    setSelected(value) {
+      this.selected = this.options.find((option) => {
+        return option[this.valueKey] === value;
+      });
+    },
+
+    emitValue() {
+      this.$emit("update:modelValue", this.selected[this.valueKey]);
+      this.$emit("input");
+    },
   },
 
   watch: {
-    options: function (options) {
-      if (options?.length) {
-        if (this.default) {
-          this.selected = options.find((option) => {
-            return option[this.valueKey] === this.default;
-          });
-        } else {
-          this.selected = this.options[0];
-        }
-        this.loaded = false;
-      }
+    modelValue(value) {
+      this.setSelected(value);
+    },
+    options(value) {
+      if (value.length) this.loaded = false;
+      this.setSelected(this.modelValue);
     },
   },
 

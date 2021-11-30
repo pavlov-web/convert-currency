@@ -13,7 +13,7 @@
 import { currencyFormat, toFixed } from "@/helpers";
 
 export default {
-  name: "SInput",
+  name: "SCurrencyInput",
   emits: ["update:from", "update:to"],
   props: {
     from: {
@@ -26,26 +26,38 @@ export default {
     },
     rate: Number,
     symbol: String,
+    primary: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
     return {
       focus: false,
+      convertTo: null,
     };
   },
 
   methods: {
     emitValue(e) {
-      const val = toFixed(+e.target.value);
-      const to = toFixed(val * this.rate);
-      this.$emit("update:from", val);
-      this.$emit("update:to", to);
+      const trimValue = toFixed(+e.target.value);
+      this.$emit("update:from", trimValue);
+      this.$emit("update:to", toFixed(trimValue * this.rate));
     },
   },
 
   computed: {
     value() {
       return this.focus ? this.from : currencyFormat(this.from, this.symbol);
+    },
+  },
+
+  watch: {
+    rate() {
+      if (this.primary) {
+        this.$emit("update:to", toFixed(this.from * this.rate));
+      }
     },
   },
 };
