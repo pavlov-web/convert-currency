@@ -22,3 +22,7 @@ export const currencyFormat = (num, currency) => {
     return new Intl.NumberFormat("ru-Ru").format(num);
   }
 };
+
+export const toFixed = (num) => {
+  return Math.floor(num * 100) / 100;
+};

@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import { currencyFormat } from "@/helpers";
+import { currencyFormat, toFixed } from "@/helpers";
 
 export default {
   name: "SInput",
@@ -36,14 +36,10 @@ export default {
 
   methods: {
     emitValue(e) {
-      const val = this.toFixed(+e.target.value);
-      const to = this.toFixed(val * this.rate);
+      const val = toFixed(+e.target.value);
+      const to = toFixed(val * this.rate);
       this.$emit("update:from", val);
       this.$emit("update:to", to);
-    },
-
-    toFixed(num) {
-      return Math.floor(num * 100) / 100;
     },
   },
 
