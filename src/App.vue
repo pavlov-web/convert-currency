@@ -2,10 +2,11 @@
   <div class="content">
     <div class="header">
       <s-icon name="wallet" size="big" />
-      <s-icon name="settings" size="big" />
+      <s-icon name="settings" size="big" pointer @click="isOpenModal = true" />
     </div>
 
     <div class="dashboard">
+      <!-- converter start -->
       <s-card title="Конвертер" class="converter">
         <div class="converter-content">
           <div class="col">
@@ -14,109 +15,138 @@
               :options="currencies"
               label-key="title"
               value-key="symbol"
-              :default="from"
-              @input="updateRate($event, undefined)"
+              v-model="d_fromSymbol"
+              @input="updateRate"
             />
+
             <h4>обменять такую сумму:</h4>
-            <s-input
-              v-model:from="from_currency"
-              v-model:to="to_currency"
-              :rate="rate?.from_to"
-              :symbol="from"
+            <s-currency-input
+              v-model:from="convertedFromTo"
+              v-model:to="convertedToFrom"
+              :rate="rateToFrom"
+              :symbol="fromSymbol"
+              primary
             />
-            <h4>1 {{ from }} → {{ rate?.from_to?.toFixed(5) + " " + to }}</h4>
+            <h4>1 {{ fromSymbol }} → {{ rateToFrom + " " + toSymbol }}</h4>
           </div>
           <div class="col">
             <h4>Нужная валюта:</h4>
-
             <s-select
               :options="currencies"
               label-key="title"
               value-key="symbol"
-              :default="to"
-              @input="updateRate(undefined, $event)"
+              v-model="d_toSymbol"
+              @input="updateRate"
             />
+
             <h4>по этой цене:</h4>
-            <s-input
-              v-model:from="to_currency"
-              v-model:to="from_currency"
-              :rate="rate?.to_from"
-              :symbol="to"
+            <s-currency-input
+              v-model:from="convertedToFrom"
+              v-model:to="convertedFromTo"
+              :rate="rateFromTo"
+              :symbol="toSymbol"
             />
-            <h4>1 {{ to }} → {{ rate?.to_from?.toFixed(5) + " " + from }}</h4>
+            <h4>1 {{ toSymbol }} → {{ rateFromTo + " " + fromSymbol }}</h4>
           </div>
           <div class="row">
-            <s-button @click="swap">Поменять валюты местами</s-button>
+            <s-button @click="swapCurrency">Поменять валюты местами</s-button>
           </div>
         </div>
       </s-card>
-
-      <s-card title="История за 10 дней" class="history">
+      <!-- converter end -->
+      <!-- history start -->
+      <s-card
+        v-if="widgets[0].visible"
+        title="История за 10 дней"
+        class="history"
+      >
         <template v-slot:tools>
-          <s-icon name="settings" pointer />
+          <s-icon
+            size="big"
+            name="close"
+            pointer
+            @click="widgets[0].visible = false"
+          />
         </template>
 
         <s-table :data="history">
           <s-column field="date" header="Дата:" size="80px" />
           <s-column field="rate" header="Цена:" style="justify-content: end">
             <template #body="{ row }">
-              {{ currencyFormat(1, row.from) }} =
-              {{ currencyFormat(row.rate, row.to) }}
+              {{ currencyFormat(1, row.fromSymbol) }} =
+              {{ currencyFormat(row.rate, row.toSymbol) }}
             </template>
           </s-column>
         </s-table>
       </s-card>
-
-      <s-card title="Последние тенденции" class="chart">
+      <!-- history end -->
+      <!-- chart start -->
+      <s-card
+        v-if="widgets[1].visible"
+        title="Последние тенденции"
+        class="chart"
+      >
         <template v-slot:tools>
-          <s-icon name="settings" pointer />
+          <s-icon
+            size="big"
+            name="close"
+            pointer
+            @click="widgets[1].visible = false"
+          />
         </template>
+
         <div ref="getHeightChart" style="height: 100%">
           <LineChart
-            :height="getHeight"
-            v-if="isChart"
-            :chart-data="testData"
+            v-if="getHeightChart"
+            :height="getHeightChart"
+            :chart-data="dataChart"
           />
         </div>
       </s-card>
-
-      <s-card title="Список стоимостей" class="costs">
+      <!-- chart end -->
+      <!-- costs start -->
+      <s-card v-if="widgets[2].visible" title="Список стоимостей" class="costs">
         <template v-slot:tools>
-          <s-icon name="settings" pointer />
+          <s-icon
+            size="big"
+            name="close"
+            pointer
+            @click="widgets[2].visible = false"
+          />
         </template>
 
-        <s-table :data="costs" border>
+        <s-table :data="costsList" border>
           <s-column field="index" header="Количество:">
             <template #body="{ row }">
-              {{ currencyFormat(row.index, row.from) }}<br />
-              {{ currencyFormat(row.index, row.to) }}
+              {{ currencyFormat(row.index, row.fromSymbol) }}<br />
+              {{ currencyFormat(row.index, row.toSymbol) }}
             </template>
           </s-column>
+
           <s-column
             field="index"
             header="Стоимость:"
             style="justify-content: end; text-align: right"
           >
             <template #body="{ row }">
-              {{ row.from_to }}<br />
-              {{ row.to_from }}
+              {{ row.rateFromTo }}<br />
+              {{ row.rateToFrom }}
             </template>
           </s-column>
         </s-table>
       </s-card>
     </div>
-
-    <!--    <ul v-if="currencies?.length">-->
-    <!--      <li v-for="option in currencies.slice(0, 5)" :key="option.value">-->
-    <!--        {{ option.title }}-->
-    <!--        <s-radio name="name" v-model="values" :value="option" />-->
-    <!--      </li>-->
-    <!--    </ul>-->
-    <!--    <s-modal title="Title" v-model:is-open="isOpenModal">-->
-    <!--      <template v-slot:content>-->
-    <!--        <s-button @click="add">Кнопка</s-button>-->
-    <!--      </template>-->
-    <!--    </s-modal>-->
+    <!-- costs end -->
+    <s-modal title="Отображение виджетов" v-model:is-open="isOpenModal">
+      <template v-slot:content>
+        <ul class="modal-list">
+          <li v-for="widget in widgets" :key="widget">
+            {{ widget.title }}
+            <s-radio name="name" v-model="widget.visible" />
+          </li>
+        </ul>
+      </template>
+    </s-modal>
   </div>
 </template>
 
@@ -124,22 +154,26 @@
 import { mapGetters } from "vuex";
 import SButton from "@/components/ui/SButton";
 import SCard from "@/components/ui/SCard";
-import SInput from "@/components/ui/SInput";
+import SCurrencyInput from "@/components/ui/SCurrencyInput";
 import SSelect from "@/components/ui/SSelect";
 import SIcon from "@/components/ui/SIcon";
 import STable from "@/components/ui/STable/STable";
 import SColumn from "@/components/ui/STable/SColumn";
 import { currencyFormat } from "@/helpers";
 import { LineChart } from "vue-chart-3";
+import SModal from "@/components/ui/SModal";
+import SRadio from "@/components/ui/SRadio";
 
 export default {
   name: "App",
   components: {
+    SRadio,
+    SModal,
     SColumn,
     STable,
     SIcon,
     SSelect,
-    SInput,
+    SCurrencyInput,
     SCard,
     SButton,
     LineChart,
@@ -148,9 +182,16 @@ export default {
   data() {
     return {
       isOpenModal: false,
-      isChart: false,
-      from_currency: 1,
-      to_currency: null,
+      getHeightChart: null,
+      convertedFromTo: 1,
+      convertedToFrom: 0,
+      d_fromSymbol: "RUB",
+      d_toSymbol: "USD",
+      widgets: [
+        { title: "История за 10 дней:", visible: true },
+        { title: "Список стоимостей:", visible: true },
+        { title: "Последние тенденции:", visible: true },
+      ],
     };
   },
 
@@ -158,43 +199,34 @@ export default {
     ...mapGetters({
       currencies: "GET_CURRENCIES",
       history: "GET_HISTORY",
-      from: "GET_FROM",
-      to: "GET_TO",
-      rate: "GET_RATE",
+      fromSymbol: "GET_FROM_SYMBOL",
+      toSymbol: "GET_TO_SYMBOL",
+      rateFromTo: "GET_RATE_FROM_TO",
+      rateToFrom: "GET_RATE_TO_FROM",
     }),
 
-    costs() {
+    costsList() {
       const index = [1, 5, 10, 25, 50, 100, 500, 1000, 5000];
-      if (!this.rate) return;
+      if (!this.rateFromTo || !this.rateToFrom) return;
       return index.map((idx) => {
         return {
-          to: this.to,
-          from: this.from,
-          from_to: currencyFormat(this.rate.from_to * idx, this.to),
-          to_from: currencyFormat(this.rate.to_from * idx, this.from),
+          toSymbol: this.toSymbol,
+          fromSymbol: this.fromSymbol,
+          rateFromTo: currencyFormat(this.rateFromTo * idx, this.toSymbol),
+          rateToFrom: currencyFormat(this.rateToFrom * idx, this.fromSymbol),
           index: idx,
         };
       });
     },
 
-    getHeight() {
-      return this.$refs.getHeightChart.offsetHeight;
-    },
-
-    testData() {
+    dataChart() {
       return {
         labels: this.history?.map((h) => h.date),
         datasets: [
           {
-            label: false,
             data: this.history?.map((h) => h.rate),
-            backgroundColor: [
-              "#77CEFF",
-              "#0079AF",
-              "#123E6B",
-              "#97B0C4",
-              "#A5C8ED",
-            ],
+            borderColor: "#26DE81",
+            backgroundColor: "#ffffff",
           },
         ],
       };
@@ -203,30 +235,25 @@ export default {
 
   methods: {
     currencyFormat,
-    async updateRate(from, to) {
-      this.$store.dispatch("GET_RATE", {
-        from: from?.symbol || this.from,
-        to: to?.symbol || this.to,
+
+    async updateRate() {
+      await this.$store.dispatch("GET_RATE", {
+        fromSymbol: this.d_fromSymbol,
+        toSymbol: this.d_toSymbol,
       });
       this.$store.dispatch("GET_HISTORY");
     },
 
-    swap() {
-      [this.from, this.to] = [this.to, this.from];
-      this.updateRate(this.from, this.to);
+    swapCurrency() {
+      [this.d_fromSymbol, this.d_toSymbol] = [this.toSymbol, this.fromSymbol];
+      this.updateRate();
     },
   },
 
   async mounted() {
+    this.getHeightChart = this.$refs.getHeightChart.offsetHeight;
     await this.$store.dispatch("GET_CURRENCIES");
-    await this.$store.dispatch("GET_RATE", {
-      from: this.from,
-      to: this.to,
-    });
-    await this.$store.dispatch("GET_HISTORY");
-    this.isChart = true;
-    console.log(this.$store.state);
-    this.to_currency = this.rate.from_to;
+    await this.updateRate();
   },
 };
 </script>
@@ -243,6 +270,10 @@ export default {
   box-shadow: 0 2px 8px rgba(134, 140, 144, 0.05);
   margin-bottom: 70px;
 
+  @media screen and (max-width: 540px) {
+    padding: 10px 20px;
+  }
+
   & .s-icon--wallet {
     path {
       fill: #f2911b;
@@ -252,22 +283,48 @@ export default {
 
 .dashboard {
   height: calc(100vh - 200px);
+  padding-left: 20px;
+  padding-right: 20px;
   min-height: 700px;
   display: grid;
-  max-width: 1360px;
+  max-width: 1440px;
   margin-left: auto;
   margin-right: auto;
   grid-template-areas:
     "converter history"
     "chart costs ";
 
-  grid-template-columns: 60% 40%;
+  grid-template-columns: calc(60% - 40px) 40%;
   grid-template-rows: calc(50% - 16px) calc(50% - 16px);
   grid-column-gap: 32px;
   grid-row-gap: 32px;
 
+  @media screen and (max-width: 1023px) {
+    height: auto;
+    grid-template-areas:
+      "converter converter"
+      "history costs"
+      "chart chart";
+
+    grid-template-columns: 50%;
+    grid-template-rows: auto;
+  }
+
+  @media screen and (max-width: 760px) {
+    grid-template-areas:
+      "converter"
+      "history"
+      "costs"
+      "chart";
+
+    grid-template-columns: 100%;
+  }
+
   & .converter {
     grid-area: converter;
+    @media screen and (max-width: 1023px) {
+      min-height: 350px;
+    }
 
     &-content {
       display: flex;
@@ -276,6 +333,15 @@ export default {
 
       .col {
         width: calc(50% - 16px);
+
+        @media screen and (max-width: 540px) {
+          width: 100%;
+          margin-top: 40px;
+
+          &:first-child {
+            margin-top: 0;
+          }
+        }
 
         h4 {
           margin-bottom: 8px;
@@ -299,6 +365,9 @@ export default {
   }
   & .chart {
     grid-area: chart;
+    @media screen and (max-width: 1023px) {
+      min-height: 400px;
+    }
   }
   & .costs {
     grid-area: costs;

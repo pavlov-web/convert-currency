@@ -42,6 +42,24 @@ h4 {
   color: #3777A2;
 }
 
+ul {
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.modal-list {
+  li {
+    margin-bottom: 30px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
 
 .fade-enter-active,
 .fade-leave-active {
